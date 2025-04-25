@@ -4,6 +4,7 @@ import { generateToken } from '../utils/generateToken';
 import { redisClient } from '../config/redis';
 import { generateOtp } from '../utils/otp';
 import logger from '../utils/logger';
+import { sendOtpEmail } from '../utils/mailer';
 
 export interface SignupInput {
   name: string;
@@ -75,6 +76,8 @@ export const sendOtpToUser = async (email: string): Promise<string> => {
   }
   const otp = generateOtp();
   await redisClient.set(`otp:${email}`, otp, { EX: OTP_EXPIRY });
+
+  await sendOtpEmail(email, otp);
 
   console.log(`OTP for ${email}: ${otp}`);
 
